@@ -7,9 +7,9 @@
    <containsHeaders>true</containsHeaders>
    <csvSeperator></csvSeperator>
    <dataFileGUID>ed067ccd-1410-408d-8efa-43c68e111130</dataFileGUID>
-   <dataSourceUrl>D:\Katalon\tugas6-katalon\Data Files\saucedemo.xlsx</dataSourceUrl>
+   <dataSourceUrl>Data Files/saucedemo.xlsx</dataSourceUrl>
    <driver>ExcelFile</driver>
-   <isInternalPath>false</isInternalPath>
+   <isInternalPath>true</isInternalPath>
    <query></query>
    <secureUserAccount>false</secureUserAccount>
    <sheetName>Data Login</sheetName>
