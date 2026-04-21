@@ -7,7 +7,7 @@
    <containsHeaders>true</containsHeaders>
    <csvSeperator></csvSeperator>
    <dataFileGUID>ed067ccd-1410-408d-8efa-43c68e111130</dataFileGUID>
-   <dataSourceUrl>C:\Users\62819\Downloads\saucedemo.xlsx</dataSourceUrl>
+   <dataSourceUrl>D:\Katalon\tugas6-katalon\Data Files\saucedemo.xlsx</dataSourceUrl>
    <driver>ExcelFile</driver>
    <isInternalPath>false</isInternalPath>
    <query></query>

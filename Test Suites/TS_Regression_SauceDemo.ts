@@ -14,7 +14,7 @@
    <testCaseLink>
       <guid>65544fa8-c9d4-4ad5-943b-36df5fe9b37c</guid>
       <isReuseDriver>false</isReuseDriver>
-      <isRun>false</isRun>
+      <isRun>true</isRun>
       <iterationNameVariable>
          <defaultValue>''</defaultValue>
          <description></description>
@@ -83,7 +83,7 @@
    <testCaseLink>
       <guid>e05df78a-5f8a-4468-849f-5e15dcccb477</guid>
       <isReuseDriver>false</isReuseDriver>
-      <isRun>true</isRun>
+      <isRun>false</isRun>
       <testCaseId>Test Cases/Modules/TC_03_Checkout</testCaseId>
       <testDataLink>
          <combinationType>ONE</combinationType>

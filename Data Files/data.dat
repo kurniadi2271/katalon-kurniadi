@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <DataFileEntity>
    <description></description>
-   <name>DF_SortProduct</name>
+   <name>data</name>
    <tag></tag>
    <connectionProperties/>
    <containsHeaders>true</containsHeaders>
    <csvSeperator></csvSeperator>
-   <dataFileGUID>5e7080cd-2b1d-4b87-852f-8b5703392189</dataFileGUID>
+   <dataFileGUID>9638c44a-dfe4-4917-8740-bafb46102895</dataFileGUID>
    <dataSourceUrl>D:\Katalon\tugas6-katalon\Data Files\saucedemo.xlsx</dataSourceUrl>
    <driver>ExcelFile</driver>
    <isInternalPath>false</isInternalPath>
    <query></query>
    <secureUserAccount>false</secureUserAccount>
-   <sheetName>Data Inventory</sheetName>
+   <sheetName>Data Login</sheetName>
    <usingGlobalDBSetting>false</usingGlobalDBSetting>
 </DataFileEntity>
