@@ -7,7 +7,28 @@
    <GlobalVariableEntity>
       <description></description>
       <initValue>'https://www.saucedemo.com/'</initValue>
-      <name>URL</name>
+      <name>baseUrl</name>
+      <protected>false</protected>
+      <valueType>STRING</valueType>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description></description>
+      <initValue>'standard_user'</initValue>
+      <name>username</name>
+      <protected>false</protected>
+      <valueType>STRING</valueType>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description></description>
+      <initValue>'secret_sauce'</initValue>
+      <name>password</name>
+      <protected>false</protected>
+      <valueType>STRING</valueType>
+   </GlobalVariableEntity>
+   <GlobalVariableEntity>
+      <description></description>
+      <initValue>'https://www.saucedemo.com/inventory.html'</initValue>
+      <name>dashboardUrl</name>
       <protected>false</protected>
       <valueType>STRING</valueType>
    </GlobalVariableEntity>
