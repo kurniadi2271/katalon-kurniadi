@@ -58,6 +58,11 @@ jobs:
       - name: 🧪 Run Katalon Test
         continue-on-error: true
         run: |
+          echo "=== Available Test Suites ==="
+          find ./Test\ Suites -name "*.ts" -type f | sort
+          echo ""
+          echo "Running TC_LOGIN.ts..."
+          
           xvfb-run --auto-servernum \
             ~/.kre/Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
             -noSplash \
@@ -69,14 +74,8 @@ jobs:
             -executionProfile="default" \
             -apiKey="${{ secrets.KATALON_API_KEY }}" \
             -Dkatalon.ignore_ssl=true \
-            -Djava.awt.headless=true || {
-              echo "❌ Test execution failed with exit code: $?"
-              echo "=== Checking logs ==="
-              find . -name "*.log" -type f -exec cat {} \; 2>/dev/null | tail -50
-              exit 1
-            }
+            -Djava.awt.headless=true
         env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # ← Tambah ini
           DISPLAY: :99
 
       - name: 📤 Upload Test Reports
