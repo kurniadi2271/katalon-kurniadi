@@ -1,4 +1,4 @@
-name: Katalon CI Manual
+name: Katalon CI
 
 on:
   push:
@@ -24,63 +24,131 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Install System Dependencies
+        run: |
+          echo "=== Installing system dependencies ==="
+          sudo apt-get update
+          sudo apt-get install -y \
+            xvfb \
+            libgtk-3-0 \
+            libgbm1 \
+            libxss1 \
+            libappindicator1 \
+            libindicator7 \
+            fonts-liberation \
+            libnss3 \
+            libxslt1.1 \
+            curl \
+            wget
+
       - name: Download Katalon Engine
         run: |
-          echo "Downloading Katalon Studio Engine 11.1.1..."
-          wget https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
-          echo "Extracting..."
+          echo "=== Downloading Katalon Studio Engine 11.1.1 ==="
+          cd $HOME
+          wget -q https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+          echo "✓ Download completed"
+          
+          echo "=== Extracting Katalon Engine ==="
           tar -xzf Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
           ls -la
+          echo "✓ Extraction completed"
 
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
 
-      - name: Install dependencies
+      - name: Verify Project Structure
         run: |
-          echo "Installing system dependencies..."
-          sudo apt-get update
-          sudo apt-get install -y xvfb libgtk-3-0 libgbm1
-
-      - name: List Project Structure
-        run: |
-          echo "=== Project Structure ==="
-          find . -type f -name "*.ts" | head -20
+          echo "=== Verifying Project Structure ==="
+          pwd
           echo ""
-          echo "=== Looking for test suites ==="
-          find . -path "*/Test Suites/*" -name "*.ts"
+          echo "Project files:"
+          ls -la
+          echo ""
+          echo "Looking for test suites:"
+          find . -path "*/Test Suites/*" -name "*.ts" 2>/dev/null || echo "No test suites found"
+          echo ""
+          echo "Looking for .prj file:"
+          find . -name "*.prj" 2>/dev/null || echo "No .prj file found"
 
       - name: Run Katalon Test
         run: |
-          echo "Starting Katalon test execution..."
-          xvfb-run --auto-servernum ./Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
+          echo "=== Starting Katalon Test Execution ==="
+          echo "Current directory: $(pwd)"
+          echo "Katalon Engine location: $HOME/Katalon_Studio_Engine_Linux_64-11.1.1"
+          echo ""
+          
+          xvfb-run --auto-servernum \
+            $HOME/Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
             -noSplash \
-            -clean \
             -runMode=console \
             -consoleLog \
             -projectPath="$GITHUB_WORKSPACE/tugas6-katalon.prj" \
-            -retry=0 \
             -testSuitePath="Test Suites/TC_LOGIN" \
             -browserType="Chrome (headless)" \
             -executionProfile="default" \
             -apiKey="${{ secrets.KATALON_API_KEY }}" \
-            --config -Djava.awt.headless=true
+            --config \
+            -webui.autoUpdateDrivers=true \
+            -Djava.awt.headless=true \
+            -Dkatalon.ignore_ssl=true
+        env:
+          DISPLAY: :99
 
-      - name: Upload Test Report
+      - name: Check Execution Logs
+        if: always()
+        run: |
+          echo "=== Checking Katalon Logs ==="
+          if [ -f "$HOME/.katalon/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1/configuration/"*.log ]; then
+            echo "Katalon configuration logs:"
+            cat "$HOME/.katalon/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1/configuration/"*.log
+          fi
+          
+          if [ -d "Reports" ]; then
+            echo ""
+            echo "Report files found:"
+            find Reports -type f
+          fi
+
+      - name: Upload Test Report Artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: katalon-report
           path: Reports/
+          retention-days: 30
 
       - name: Prepare GitHub Pages
         if: always()
         run: |
           mkdir -p public
-          if [ -f "Reports/report.html" ]; then
-            cp Reports/report.html public/index.html
-            echo "Report ready for deployment"
+          
+          # Try to find and copy report.html
+          if find Reports -name "report.html" -type f 2>/dev/null | head -1 | xargs -I {} cp {} public/index.html 2>/dev/null; then
+            echo "✓ Report found and copied successfully"
           else
-            echo "<h1>Test Report</h1><p>Report not found - check logs</p>" > public/index.html
+            echo "Report not found, creating fallback page..."
+            cat > public/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Katalon Test Report</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; }
+              .status { padding: 20px; border-radius: 5px; }
+              .error { background-color: #f8d7da; color: #721c24; }
+            </style>
+          </head>
+          <body>
+            <h1>Katalon Test Execution Report</h1>
+            <div class="status error">
+              <p>❌ Report generation failed or tests did not complete</p>
+              <p>Please check the Artifacts section for detailed logs</p>
+            </div>
+          </body>
+          </html>
+          EOF
           fi
 
       - name: Upload Pages Artifact
@@ -89,20 +157,18 @@ jobs:
         with:
           path: public
 
-  deploy-pages:
-    needs: katalon-test
-    runs-on: ubuntu-latest
-    if: always()
-
-    permissions:
-      pages: write
-      id-token: write
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        if: always()
+
+      - name: Test Result Summary
+        if: always()
+        run: |
+          echo "=== Execution Summary ==="
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo ""
+          echo "✓ Test execution completed"
+          echo "✓ Check GitHub Pages for report: ${{ steps.deployment.outputs.page_url }}"
