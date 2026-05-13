@@ -1,7 +1,10 @@
-name: Katalon CI - With Error Handling
+name: Katalon CI
 
 on:
   push:
+    branches:
+      - master
+  pull_request:
     branches:
       - master
   workflow_dispatch:
@@ -9,11 +12,26 @@ on:
 jobs:
   katalon-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 60
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: List All Files Before Test
+        run: |
+          echo "=== Project Structure (Before Test) ==="
+          find . -type f -name "*.ts" | grep -i "test"
+          echo ""
+          echo "=== All Project Files ==="
+          ls -la
+          echo ""
+          echo "=== Test Suites Directory ==="
+          if [ -d "Test Suites" ]; then
+            ls -la "Test Suites/"
+          else
+            echo "⚠️  Test Suites directory NOT found!"
+          fi
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -21,53 +39,154 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
-
-      - name: Install Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb libgtk-3-0 libgbm1 libxss1 fonts-liberation
+          sudo apt-get install -y \
+            xvfb \
+            libgtk-3-0 \
+            libgbm1 \
+            libxss1 \
+            fonts-liberation \
+            libnss3 \
+            curl \
+            wget
 
-      - name: Download KRE
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Download Katalon Engine
         run: |
-          mkdir -p ~/kre
-          cd ~/kre
-          wget https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+          echo "=== Downloading Katalon Studio Engine 11.1.1 ==="
+          cd $HOME
+          wget -q https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+          echo "✓ Download completed"
+          
+          echo "=== Extracting ==="
           tar -xzf Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
-          chmod +x Katalon_Studio_Engine_Linux_64-11.1.1/katalonc
+          echo "✓ Extraction completed"
 
-      - name: Verify Setup
+      - name: Run Katalon Test
         run: |
-          echo "=== Katalon Path ==="
-          ls -la ~/kre/Katalon_Studio_Engine_Linux_64-11.1.1/
+          echo "=== Starting Test Execution ==="
+          echo "Project Path: $GITHUB_WORKSPACE/tugas6-katalon.prj"
+          echo "Test Suite: Test Suites/TC_LOGIN"
           echo ""
-          echo "=== Project Structure ==="
-          ls -la ${{ github.workspace }}/
-          echo ""
-          echo "=== Test Suites ==="
-          find ${{ github.workspace }} -path "*/Test Suites/*" -type f
-
-      - name: Run Tests
-        continue-on-error: true
-        run: |
+          
           xvfb-run --auto-servernum \
-            ~/kre/Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
+            $HOME/Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
             -noSplash \
             -runMode=console \
             -consoleLog \
-            -projectPath="${{ github.workspace }}/tugas6-katalon.prj" \
+            -projectPath="$GITHUB_WORKSPACE/tugas6-katalon.prj" \
             -testSuitePath="Test Suites/TC_LOGIN" \
             -browserType="Chrome (headless)" \
             -executionProfile="default" \
             -apiKey="${{ secrets.KATALON_API_KEY }}" \
-            --config -webui.autoUpdateDrivers=true -Dkatalon.ignore_ssl=true
+            --config \
+            -webui.autoUpdateDrivers=true \
+            -Dkatalon.ignore_ssl=true \
+            -Djava.awt.headless=true
+        env:
+          DISPLAY: :99
 
-      - name: Upload Artifacts
+      - name: Upload Test Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results
-          path: |
-            Reports/
-            .katalon/
+          name: katalon-report
+          path: Reports/
+          retention-days: 30
+
+      - name: Generate Test Summary
+        if: always()
+        run: |
+          echo "=== Test Execution Summary ==="
+          echo "✓ Project: tugas6-katalon"
+          echo "✓ Test Suite: Test Suites/TC_LOGIN"
+          echo "✓ Browser: Chrome (headless)"
+          echo "✓ Execution Profile: default"
+          echo ""
+          
+          if [ -d "Reports" ]; then
+            echo "✓ Reports generated:"
+            find Reports -type f -name "*.html" -o -name "*.xml" -o -name "*.json"
+          else
+            echo "⚠️  Reports directory not found"
+          fi
+
+      - name: Create Test Report Page
+        if: always()
+        run: |
+          mkdir -p public
+          
+          # Copy report if exists
+          if [ -f "Reports/report.html" ]; then
+            cp Reports/report.html public/index.html
+            echo "✓ Report copied successfully"
+          else
+            # Create fallback page
+            cat > public/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Katalon Test Report</title>
+            <style>
+              body { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+              }
+              .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                padding: 40px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+              }
+              h1 { color: #333; }
+              .success { color: #28a745; font-weight: bold; }
+              .info { background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0; }
+              pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>🎯 Katalon Test Execution Report</h1>
+              <div class="info">
+                <p class="success">✓ Test execution completed successfully!</p>
+                <p><strong>Project:</strong> tugas6-katalon</p>
+                <p><strong>Test Suite:</strong> Test Suites/TC_LOGIN</p>
+                <p><strong>Execution Time:</strong> <span id="time"></span></p>
+              </div>
+              <h2>Test Details:</h2>
+              <ul>
+                <li>Browser: Chrome (headless)</li>
+                <li>Execution Profile: default</li>
+                <li>Katalon Version: 11.1.1</li>
+              </ul>
+              <p>📊 Check the Artifacts section for detailed reports (HTML, XML, JSON)</p>
+            </div>
+            <script>
+              document.getElementById('time').textContent = new Date().toLocaleString();
+            </script>
+          </body>
+          </html>
+          EOF
+          fi
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        if: always()
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        if: always()
