@@ -30,6 +30,6 @@ jobs:
         -noSplash \
         -runMode=console \
         -projectPath="$GITHUB_WORKSPACE" \
-        -testSuitePath="Test Suites/TC_LOGIN" \
+        -testSuitePath="Test Suites/Login" \
         -browserType="Chrome (headless)" \
         -apiKey="${{ secrets.KATALON_API_KEY }}"
