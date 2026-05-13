@@ -62,13 +62,45 @@ jobs:
           DISPLAY: :99
         continue-on-error: true
 
-      - name: ⬇️ Download KRE
+      - name: ⬇️ Download & Setup KRE
         run: |
+          echo "=== Downloading KRE ==="
           mkdir -p ~/.kre
           cd ~/.kre
+          
+          # Download
           wget -q https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+          
+          # Verify download
+          if [ ! -f "Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz" ]; then
+            echo "❌ Download failed!"
+            exit 1
+          fi
+          
+          echo "✓ Download complete ($(du -h Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz | cut -f1))"
+          
+          # Extract
           tar -xzf Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
-          chmod +x ./Katalon_Studio_Engine_Linux_64-11.1.1/katalonc  # ← Tambah ini
+          
+          # Verify extraction
+          if [ ! -d "Katalon_Studio_Engine_Linux_64-11.1.1" ]; then
+            echo "❌ Extraction failed!"
+            exit 1
+          fi
+          
+          # Make executable
+          chmod +x Katalon_Studio_Engine_Linux_64-11.1.1/katalonc
+          
+          # Verify executable exists
+          if [ ! -f "Katalon_Studio_Engine_Linux_64-11.1.1/katalonc" ]; then
+            echo "❌ katalonc not found after extraction!"
+            ls -la Katalon_Studio_Engine_Linux_64-11.1.1/
+            exit 1
+          fi
+          
+          echo "✓ KRE ready at: ~/.kre/Katalon_Studio_Engine_Linux_64-11.1.1"
+          
+          # Cleanup
           rm -f Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
 
       - name: 🧪 Run Katalon Test
