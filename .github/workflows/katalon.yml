@@ -22,15 +22,11 @@ jobs:
 
       - name: 📋 Verify Test Suite Exists
         run: |
-          echo "=== Checking for TC_LOGIN.ts ==="
           if [ -f "./Test Suites/TC_LOGIN.ts" ]; then
             echo "✓ TC_LOGIN.ts found!"
-            wc -l "./Test Suites/TC_LOGIN.ts"
           else
             echo "❌ TC_LOGIN.ts NOT found!"
-            echo ""
-            echo "Available test suites:"
-            find "./Test Suites" -name "*.ts" -type f | sort
+            find . -name "*.ts" -type f | head -20
             exit 1
           fi
 
@@ -56,30 +52,33 @@ jobs:
           cd ~/.kre
           wget -q https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
           tar -xzf Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+          chmod +x ./Katalon_Studio_Engine_Linux_64-11.1.1/katalonc  # ← Tambah ini
           rm -f Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
 
       - name: 🧪 Run Katalon Test
         continue-on-error: true
         run: |
-          echo "=== Test Execution ==="
-          echo "Project: tugas6-katalon.prj"
-          echo "Test Suite: Test Suites/TC_LOGIN"
-          echo ""
-          
           xvfb-run --auto-servernum \
             ~/.kre/Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
             -noSplash \
             -runMode=console \
             -consoleLog \
             -projectPath="$GITHUB_WORKSPACE/tugas6-katalon.prj" \
-            -testSuitePath="Test Suites/TC_LOGIN" \
+            -testSuitePath="Test Suites/TC_LOGIN.ts" \
             -browserType="Chrome (headless)" \
             -executionProfile="default" \
             -apiKey="${{ secrets.KATALON_API_KEY }}" \
             -Dkatalon.ignore_ssl=true \
-            -Djava.awt.headless=true
+            -Djava.awt.headless=true || {
+              echo "❌ Test execution failed with exit code: $?"
+              echo "=== Checking logs ==="
+              find . -name "*.log" -type f -exec cat {} \; 2>/dev/null | tail -50
+              exit 1
+            }
         env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # ← Tambah ini
           DISPLAY: :99
+        continue-on-error: true
 
       - name: 📤 Upload Test Reports
         uses: actions/upload-artifact@v4
