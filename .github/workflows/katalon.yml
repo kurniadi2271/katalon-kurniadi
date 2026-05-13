@@ -78,7 +78,6 @@ jobs:
         env:
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # ← Tambah ini
           DISPLAY: :99
-        continue-on-error: true
 
       - name: 📤 Upload Test Reports
         uses: actions/upload-artifact@v4
