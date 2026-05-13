@@ -3,7 +3,7 @@ name: Katalon CI
 on:
   push:
     branches:
-      - main
+      - master
 
   workflow_dispatch:
 
@@ -44,26 +44,21 @@ jobs:
         -executionProfile="default" \
         -apiKey="${{ secrets.KATALON_API_KEY }}"
 
-    - name: Upload Report Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: katalon-report
-        path: Reports/
-
-    - name: Prepare GitHub Pages
+	- name: Upload Report Artifact
+	  uses: actions/upload-artifact@v4
+	  with:
+	    name: katalon-report
+	    path: Reports/
+	
+	- name: Prepare GitHub Pages
 	  run: |
 	    mkdir public
+	    find Reports -name "report.html" -exec cp {} public/index.html \;
 	
-	    latest=$(find Reports -name "report.html" | head -n 1)
-	
-	    if [ -f "$latest" ]; then
-	      cp "$latest" public/index.html
-	    fi
-
-    - name: Upload Pages Artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: public
+	- name: Upload Pages Artifact
+	  uses: actions/upload-pages-artifact@v3
+	  with:
+	    path: public
 
   deploy-pages:
     needs: katalon-test
