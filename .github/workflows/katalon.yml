@@ -47,6 +47,9 @@ jobs:
         cp -r $GITHUB_WORKSPACE/* $WORKDIR
         echo "WORKDIR=$WORKDIR" >> $GITHUB_ENV
 
+    - name: List Test Suites
+      run: find Test\ Suites -name "*.ts"
+
     - name: Run Katalon Test
       run: |
         cd $WORKDIR
