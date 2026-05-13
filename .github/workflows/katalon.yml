@@ -46,22 +46,6 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y xvfb libgtk-3-0 libgbm1 libxss1 fonts-liberation libnss3
 
-      - name: 🔨 Rebuild Katalon Project Index
-        run: |
-          echo "=== Rebuilding project index ==="
-          xvfb-run --auto-servernum \
-            ~/.kre/Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
-            -noSplash \
-            -runMode=console \
-            -consoleLog \
-            -projectPath="$GITHUB_WORKSPACE/tugas6-katalon.prj" \
-            -apiKey="${{ secrets.KATALON_API_KEY }}" \
-            -Dkatalon.ignore_ssl=true \
-            -Djava.awt.headless=true || echo "⚠️ Rebuild attempt completed (may have warnings)"
-        env:
-          DISPLAY: :99
-        continue-on-error: true
-
       - name: ⬇️ Download & Setup KRE
         run: |
           echo "=== Downloading KRE ==="
@@ -102,6 +86,22 @@ jobs:
           
           # Cleanup
           rm -f Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+
+      - name: 🔨 Rebuild Katalon Project Index
+        run: |
+          echo "=== Rebuilding project index ==="
+          xvfb-run --auto-servernum \
+            ~/.kre/Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
+            -noSplash \
+            -runMode=console \
+            -consoleLog \
+            -projectPath="$GITHUB_WORKSPACE/tugas6-katalon.prj" \
+            -apiKey="${{ secrets.KATALON_API_KEY }}" \
+            -Dkatalon.ignore_ssl=true \
+            -Djava.awt.headless=true || echo "⚠️ Rebuild attempt completed (may have warnings)"
+        env:
+          DISPLAY: :99
+        continue-on-error: true
 
       - name: 🧪 Run Katalon Test
         continue-on-error: true
