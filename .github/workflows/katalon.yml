@@ -58,7 +58,7 @@ jobs:
         -consoleLog \
         -projectPath="$WORKDIR/tugas6-katalon.prj" \
         -retry=0 \
-        -testSuitePath="Test Suites/Login" \
+        -testSuitePath="Test Suites/TC_LOGIN.ts" \
         -browserType="Chrome (headless)" \
         -executionProfile="default" \
         -apiKey="${{ secrets.KATALON_API_KEY }}" \
