@@ -1,4 +1,4 @@
-name: Katalon CI
+name: Katalon CI Manual
 
 on:
   push:
@@ -18,21 +18,54 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Katalon Studio GitHub Action
-        uses: katalon-studio/katalon-studio-github-action@v4.0
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          version: '11.1.1'
-          projectPath: '${{ github.workspace }}'
-          args: >-
-            -noSplash
-            -retry=0
-            -testSuitePath="Test Suites/TC_LOGIN"
-            -browserType="Chrome (headless)"
-            -executionProfile="default"
-            -apiKey=${{ secrets.KATALON_API_KEY }}
-            --config -webui.autoUpdateDrivers=true
+          distribution: 'temurin'
+          java-version: '21'
 
-      - name: Upload Report Artifact
+      - name: Download Katalon Engine
+        run: |
+          echo "Downloading Katalon Studio Engine 11.1.1..."
+          wget https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+          echo "Extracting..."
+          tar -xzf Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+          ls -la
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Install dependencies
+        run: |
+          echo "Installing system dependencies..."
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgtk-3-0 libgbm1
+
+      - name: List Project Structure
+        run: |
+          echo "=== Project Structure ==="
+          find . -type f -name "*.ts" | head -20
+          echo ""
+          echo "=== Looking for test suites ==="
+          find . -path "*/Test Suites/*" -name "*.ts"
+
+      - name: Run Katalon Test
+        run: |
+          echo "Starting Katalon test execution..."
+          xvfb-run --auto-servernum ./Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
+            -noSplash \
+            -clean \
+            -runMode=console \
+            -consoleLog \
+            -projectPath="$GITHUB_WORKSPACE/tugas6-katalon.prj" \
+            -retry=0 \
+            -testSuitePath="Test Suites/TC_LOGIN" \
+            -browserType="Chrome (headless)" \
+            -executionProfile="default" \
+            -apiKey="${{ secrets.KATALON_API_KEY }}" \
+            --config -Djava.awt.headless=true
+
+      - name: Upload Test Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -45,8 +78,9 @@ jobs:
           mkdir -p public
           if [ -f "Reports/report.html" ]; then
             cp Reports/report.html public/index.html
+            echo "Report ready for deployment"
           else
-            echo "<h1>Test Report</h1><p>No report generated</p>" > public/index.html
+            echo "<h1>Test Report</h1><p>Report not found - check logs</p>" > public/index.html
           fi
 
       - name: Upload Pages Artifact
