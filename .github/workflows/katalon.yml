@@ -51,12 +51,14 @@ jobs:
         path: Reports/
 
     - name: Prepare GitHub Pages
-	  run:: |
+	  run: |
 	    mkdir public
 	
 	    latest=$(find Reports -name "report.html" | head -n 1)
 	
-	    cp "$latest" public/index.html
+	    if [ -f "$latest" ]; then
+	      cp "$latest" public/index.html
+	    fi
 
     - name: Upload Pages Artifact
       uses: actions/upload-pages-artifact@v3
