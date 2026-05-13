@@ -32,17 +32,27 @@ jobs:
         wget https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
         tar -xzf Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
 
+    - name: Setup Chrome
+      uses: browser-actions/setup-chrome@v1
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb libgtk-3-0 libgbm1
+
     - name: Run Katalon Test
       run: |
-        ./Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
+        xvfb-run --auto-servernum ./Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
         -noSplash \
         -runMode=console \
+        -consoleLog \
         -projectPath="$GITHUB_WORKSPACE" \
         -retry=0 \
         -testSuitePath="Test Suites/Login" \
         -browserType="Chrome (headless)" \
         -executionProfile="default" \
-        -apiKey="${{ secrets.KATALON_API_KEY }}"
+        -apiKey="${{ secrets.KATALON_API_KEY }}" \
+        --config -Djava.awt.headless=true
 
     - name: Upload Report Artifact
       uses: actions/upload-artifact@v4
