@@ -3,7 +3,7 @@
    <description></description>
    <name>tugas6-katalon</name>
    <tag></tag>
-   <UUID>241fdfb0-e8f3-4bfb-ba7d-3a397b1d7dc1</UUID>
+   <UUID>e1de337e-6f16-4bb9-82b6-277790f90555</UUID>
    <createdEdition>ENTERPRISE</createdEdition>
    <createdVersion>11.1.1</createdVersion>
    <freeLicense>false</freeLicense>
@@ -11,7 +11,6 @@
    <modifiedEdition>ENTERPRISE</modifiedEdition>
    <modifiedVersion>11.1.1</modifiedVersion>
    <pageLoadTimeout>0</pageLoadTimeout>
-   <projectFileLocation>D:\Katalon\tugas6-katalon\tugas6-katalon.prj</projectFileLocation>
    <sourceContent>
       <sourceFolderList>
          <sourceFolderConfiguration>
