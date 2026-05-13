@@ -40,13 +40,23 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y xvfb libgtk-3-0 libgbm1
 
+    - name: Prepare clean workspace
+      run: |
+        WORKDIR=$RUNNER_TEMP/katalon-workspace
+        mkdir -p $WORKDIR
+        cp -r $GITHUB_WORKSPACE/* $WORKDIR
+        echo "WORKDIR=$WORKDIR" >> $GITHUB_ENV
+
     - name: Run Katalon Test
       run: |
+        cd $WORKDIR
+
         xvfb-run --auto-servernum ./Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
         -noSplash \
+        -clean \
         -runMode=console \
         -consoleLog \
-        -projectPath="$GITHUB_WORKSPACE" \
+        -projectPath="$WORKDIR/tugas6-katalon.prj" \
         -retry=0 \
         -testSuitePath="Test Suites/Login" \
         -browserType="Chrome (headless)" \
