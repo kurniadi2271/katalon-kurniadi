@@ -1,0 +1,35 @@
+name: Katalon CI
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Download Katalon Runtime Engine
+      run: |
+        wget https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+        tar -xzf Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+
+    - name: Run Test Suite
+      run: |
+        ./Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
+        -noSplash \
+        -runMode=console \
+        -projectPath="$GITHUB_WORKSPACE" \
+        -testSuitePath="Test Suites/TC_LOGIN" \
+        -browserType="Chrome (headless)" \
+        -apiKey="${{ secrets.KATALON_API_KEY }}"

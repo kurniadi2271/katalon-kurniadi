@@ -21,7 +21,7 @@ WebUI.callTestCase(findTestCase('Test Cases/Login_Valid'), [('username') : 'stan
     FailureHandling.STOP_ON_FAILURE)
 
 List images = WebUI.findWebElements(
-		findTestObject('Products/list_inventory_images'), 5)
+		findTestObject('Page_Inventory/list_inventory_images'), 5)
 
 for(def img : images){
 	assert img.isDisplayed()

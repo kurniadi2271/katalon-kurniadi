@@ -2,7 +2,7 @@
 <TestCaseEntity>
    <description></description>
    <name>LGN-N-01</name>
-   <tag></tag>
+   <tag>smoke</tag>
    <comment></comment>
    <recordOption>OTHER</recordOption>
    <testCaseGuid>d1d5eb46-91bd-46e6-b6fd-b15cab01ac97</testCaseGuid>

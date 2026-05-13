@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <TestCaseEntity>
    <description></description>
-   <name>New Test Case</name>
+   <name>INV-N-01</name>
    <tag></tag>
    <comment></comment>
    <recordOption>OTHER</recordOption>
-   <testCaseGuid>b79c2a53-b26e-4891-82d0-7db9588e7811</testCaseGuid>
+   <testCaseGuid>d79f9fc2-b561-4e65-8b47-218f64be718c</testCaseGuid>
 </TestCaseEntity>

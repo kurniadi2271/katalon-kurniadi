@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <WebElementEntity>
    <description></description>
-   <name>select_SortContainer</name>
+   <name>select_sort</name>
    <tag></tag>
    <elementGuidId>28344dc2-3eb1-4caa-b204-cd5507e6161d</elementGuidId>
    <selectorCollection>
       <entry>
-         <key>XPATH</key>
-         <value>//select[@class='product_sort_container']</value>
-      </entry>
-      <entry>
          <key>CSS</key>
          <value>span.select_container</value>
+      </entry>
+      <entry>
+         <key>XPATH</key>
+         <value>//select[@class='product_sort_container']</value>
       </entry>
    </selectorCollection>
    <selectorMethod>XPATH</selectorMethod>

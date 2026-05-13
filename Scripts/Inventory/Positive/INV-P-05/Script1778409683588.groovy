@@ -22,15 +22,22 @@ WebUI.callTestCase(findTestCase('Test Cases/Login_Valid'), [('username') : 'stan
     FailureHandling.STOP_ON_FAILURE)
 
 def dropdown = WebUI.findWebElement(
-		findTestObject('Products/select_sort'), 5)
+		findTestObject('Page_Inventory/select_sort'), 5)
 
 new Select(dropdown).selectByValue('az')
 
-List names = WebUI.findWebElements(
-		findTestObject('Products/list_inventory_names'), 5)
+WebUI.delay(1)
 
-List actual = names.collect { it.getText() }
-List expected = actual.sort()
+List names = WebUI.findWebElements(
+    findTestObject('Page_Inventory/list_inventory_names'), 5)
+
+List actual = names.collect { it.getText().trim() }
+
+List expected = new ArrayList(actual)
+expected.sort()
+
+println("ACTUAL  : " + actual)
+println("EXPECTED: " + expected)
 
 assert actual == expected
 

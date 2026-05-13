@@ -20,9 +20,9 @@ import org.openqa.selenium.Keys as Keys
 WebUI.callTestCase(findTestCase('Test Cases/Login_Valid'), [('username') : 'standard_user', ('password') : 'secret_sauce'], 
     FailureHandling.STOP_ON_FAILURE)
 
-List items = WebUI.findWebElements(
-		findTestObject('Products/list_inventory_items'), 5)
+List items = WebUI.findWebElements(findTestObject('Page_Inventory/list_inventory_items'), 5)
 
 WebUI.verifyEqual(items.size(), 6)
 
 WebUI.closeBrowser()
+

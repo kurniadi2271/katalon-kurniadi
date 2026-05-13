@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <TestCaseEntity>
    <description></description>
-   <name>LGN-P-01</name>
-   <tag>smoke</tag>
+   <name>INV-N-05</name>
+   <tag></tag>
    <comment></comment>
-   <origin>WEB_RECORDER</origin>
    <recordOption>OTHER</recordOption>
-   <testCaseGuid>a0581233-15d6-4bd0-9d33-368b41ba7c57</testCaseGuid>
+   <testCaseGuid>22012d16-630b-4b8a-a4b8-d16be545fcfc</testCaseGuid>
 </TestCaseEntity>

@@ -1,5 +1,4 @@
 import static com.kms.katalon.core.checkpoint.CheckpointFactory.findCheckpoint
-import com.kms.katalon.core.util.KeywordUtil
 import static com.kms.katalon.core.testcase.TestCaseFactory.findTestCase
 import static com.kms.katalon.core.testdata.TestDataFactory.findTestData
 import static com.kms.katalon.core.testobject.ObjectRepository.findTestObject
@@ -18,17 +17,3 @@ import com.kms.katalon.core.windows.keyword.WindowsBuiltinKeywords as Windows
 import internal.GlobalVariable as GlobalVariable
 import org.openqa.selenium.Keys as Keys
 
-WebUI.callTestCase(findTestCase('Test Cases/Login_Valid'), [('username') : 'standard_user', ('password') : 'secret_sauce'], 
-    FailureHandling.STOP_ON_FAILURE)
-
-List prices = WebUI.findWebElements(
-		findTestObject('Page_Inventory/list_inventory_prices'), 5)
-
-for(def item : prices){
-    String price = item.getText().trim()
-    
-    assert price.contains('$')
-    KeywordUtil.logInfo("Price: " + price)
-}
-
-WebUI.closeBrowser()

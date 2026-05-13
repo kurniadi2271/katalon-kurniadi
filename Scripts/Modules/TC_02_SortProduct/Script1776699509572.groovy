@@ -15,7 +15,7 @@ if (tc_id == 'INV-N-01') {
     WebUI.comment("Berhasil diredirect ke: " + currentUrl)
 } 
 else {
-    WebUI.waitForElementVisible(findTestObject('Object Repository/Page_Inventory/select_SortContainer'), 10)
+    WebUI.waitForElementVisible(findTestObject('Object Repository/Page_Inventory/select_sort'), 10)
 
 	// 3. LOGIKA KHUSUS: Pakai selectByValue supaya lebih akurat daripada Label
 	// A-Z = 'az', Z-A = 'za', Low-High = 'lohi', High-Low = 'hilo'
@@ -26,7 +26,7 @@ else {
 	else if (sort_option == 'Price (high to low)') { sortValue = 'hilo' }
 	
 	// Eksekusi Pilih Sorting
-	WebUI.selectOptionByValue(findTestObject('Object Repository/Page_Inventory/select_SortContainer'), sortValue, false)
+	WebUI.selectOptionByValue(findTestObject('Object Repository/Page_Inventory/select_sort'), sortValue, false)
 	
 	// 4. FORCE DELAY (Penting banget karena SauceDemo lambat render urutan)
 	WebUI.delay(3) 

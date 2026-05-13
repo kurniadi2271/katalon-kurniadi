@@ -20,11 +20,12 @@ import org.openqa.selenium.Keys as Keys
 WebUI.callTestCase(findTestCase('Test Cases/Login_Valid'), [('username') : 'standard_user', ('password') : 'secret_sauce'], 
     FailureHandling.STOP_ON_FAILURE)
 
-List names = WebUI.findWebElements(
-		findTestObject('Products/list_inventory_names'), 5)
+List names = WebUI.findWebElements(findTestObject('Page_Inventory/list_inventory_names'), 5)
 
-for(def item : names){
-	assert item.getText().trim() != ''
+for (def item : names) {
+    String text = item.getText().trim()
+    println("ITEM TEXT: [" + text + "]")
+    assert text != ''
 }
 
 WebUI.closeBrowser()
