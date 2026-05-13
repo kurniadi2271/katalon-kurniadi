@@ -2,15 +2,23 @@ name: Katalon CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+
   workflow_dispatch:
 
 jobs:
-  test:
+  katalon-test:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
     steps:
-    - name: Checkout code
+
+    - name: Checkout Repository
       uses: actions/checkout@v4
 
     - name: Setup Java
@@ -19,17 +27,52 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Download Katalon Runtime Engine
+    - name: Download Katalon Engine
       run: |
         wget https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
         tar -xzf Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
 
-    - name: Run Test Suite
+    - name: Run Katalon Test
       run: |
         ./Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
         -noSplash \
         -runMode=console \
         -projectPath="$GITHUB_WORKSPACE" \
+        -retry=0 \
         -testSuitePath="Test Suites/Login" \
         -browserType="Chrome (headless)" \
+        -executionProfile="default" \
         -apiKey="${{ secrets.KATALON_API_KEY }}"
+
+    - name: Upload Report Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: katalon-report
+        path: Reports/
+
+    - name: Prepare GitHub Pages
+      run: |
+        mkdir public
+        cp -r Reports/* public/ || true
+
+    - name: Upload Pages Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: public
+
+  deploy-pages:
+    needs: katalon-test
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
