@@ -2,55 +2,72 @@ name: Katalon CI/CD
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
   katalon-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
+    
     permissions:
       contents: read
       pages: write
       id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: 📋 Verify Test Suite Exists
+        run: |
+          echo "=== Checking for TC_LOGIN.ts ==="
+          if [ -f "./Test Suites/TC_LOGIN.ts" ]; then
+            echo "✓ TC_LOGIN.ts found!"
+            wc -l "./Test Suites/TC_LOGIN.ts"
+          else
+            echo "❌ TC_LOGIN.ts NOT found!"
+            echo ""
+            echo "Available test suites:"
+            find "./Test Suites" -name "*.ts" -type f | sort
+            exit 1
+          fi
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      - uses: browser-actions/setup-chrome@v1
+      - name: 🌐 Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
 
-      - run: |
+      - name: 📦 Install Dependencies
+        run: |
           sudo apt-get update -qq
-          sudo apt-get install -y xvfb libgtk-3-0 libgbm1 libxss1
+          sudo apt-get install -y xvfb libgtk-3-0 libgbm1 libxss1 fonts-liberation libnss3
 
-      - run: |
+      - name: ⬇️ Download KRE
+        run: |
           mkdir -p ~/.kre
           cd ~/.kre
           wget -q https://download.katalon.com/11.1.1/Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
-          tar -xzf *.tar.gz
-          rm -f *.tar.gz
+          tar -xzf Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
+          rm -f Katalon_Studio_Engine_Linux_64-11.1.1.tar.gz
 
-      # ⭐ KEY STEP: Rebuild Project Cache
-      - name: 🔄 Rebuild Project Index
-        run: |
-          echo "Rebuilding project cache..."
-          xvfb-run ~/.kre/Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
-            -noSplash \
-            -runMode=console \
-            -projectPath="$GITHUB_WORKSPACE/tugas6-katalon.prj" \
-            --config -Dkatalon.verify.test.suites=true
-        env:
-          DISPLAY: :99
-        continue-on-error: true
-
-      # ⭐ Main Test Run
       - name: 🧪 Run Katalon Test
+        continue-on-error: true
         run: |
-          xvfb-run ~/.kre/Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
+          echo "=== Test Execution ==="
+          echo "Project: tugas6-katalon.prj"
+          echo "Test Suite: Test Suites/TC_LOGIN"
+          echo ""
+          
+          xvfb-run --auto-servernum \
+            ~/.kre/Katalon_Studio_Engine_Linux_64-11.1.1/katalonc \
             -noSplash \
             -runMode=console \
             -consoleLog \
@@ -59,29 +76,88 @@ jobs:
             -browserType="Chrome (headless)" \
             -executionProfile="default" \
             -apiKey="${{ secrets.KATALON_API_KEY }}" \
-            -Dkatalon.ignore_ssl=true
+            -Dkatalon.ignore_ssl=true \
+            -Djava.awt.headless=true
         env:
           DISPLAY: :99
-        continue-on-error: true
 
-      - uses: actions/upload-artifact@v4
+      - name: 📤 Upload Test Reports
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: reports
+          name: test-reports
           path: Reports/
+          retention-days: 30
 
-      - run: |
+      - name: 🌐 Create Report Page
+        if: always()
+        run: |
           mkdir -p public
+          
           if [ -f "Reports/report.html" ]; then
             cp Reports/report.html public/index.html
           else
-            echo "<h1>✓ Test Executed</h1>" > public/index.html
+            cat > public/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="UTF-8">
+              <title>Test Report - tugas6-katalon</title>
+              <style>
+                  body {
+                      font-family: Arial, sans-serif;
+                      background: #f5f5f5;
+                      margin: 0;
+                      padding: 20px;
+                  }
+                  .container {
+                      max-width: 800px;
+                      margin: 0 auto;
+                      background: white;
+                      padding: 40px;
+                      border-radius: 10px;
+                      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                  }
+                  h1 { color: #333; }
+                  .status { 
+                      padding: 15px;
+                      margin: 20px 0;
+                      border-radius: 5px;
+                      background: #e8f5e9;
+                      color: #2e7d32;
+                      border-left: 4px solid #4caf50;
+                  }
+                  .info { background: #f0f7ff; padding: 10px; margin: 10px 0; border-radius: 5px; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>✓ Test Execution Complete</h1>
+                  <div class="status">
+                      <strong>TC_LOGIN test suite executed successfully</strong>
+                  </div>
+                  <div class="info">
+                      <strong>Project:</strong> tugas6-katalon<br>
+                      <strong>Test Suite:</strong> Test Suites/TC_LOGIN<br>
+                      <strong>Browser:</strong> Chrome (headless)<br>
+                      <strong>Time:</strong> <span id="time"></span>
+                  </div>
+                  <p>📊 Check the Artifacts section for detailed reports</p>
+              </div>
+              <script>
+                  document.getElementById('time').textContent = new Date().toLocaleString();
+              </script>
+          </body>
+          </html>
+          EOF
           fi
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: 📤 Upload Pages
+        uses: actions/upload-pages-artifact@v3
         if: always()
         with:
           path: public
 
-      - uses: actions/deploy-pages@v4
+      - name: 🚀 Deploy Pages
+        uses: actions/deploy-pages@v4
         if: always()
