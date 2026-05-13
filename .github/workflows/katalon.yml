@@ -117,7 +117,7 @@ jobs:
             -runMode=console \
             -consoleLog \
             -projectPath="$GITHUB_WORKSPACE/tugas6-katalon.prj" \
-            -testSuitePath="Test Suites/TC_LOGIN.ts" \
+            -testSuitePath="Test Suites/Login/LGN_P.ts" \
             -browserType="Chrome (headless)" \
             -executionProfile="default" \
             -apiKey="${{ secrets.KATALON_API_KEY }}" \
